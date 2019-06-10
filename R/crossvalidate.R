@@ -114,13 +114,27 @@ crossvalidation_roc <- function(classifier, title = "") {
 #' @return data frame of metrics
 #' @export
 crossvalidation_metrics <- function(classifier) {
-  dplyr::bind_rows(
-    yardstick::sens(classifier$pred, obs, pred),
-    yardstick::spec(classifier$pred, obs, pred),
-    yardstick::ppv(classifier$pred,  obs, pred),
-    yardstick::npv(classifier$pred,  obs, pred)
-  ) %>%
-    dplyr::transmute(Metric = .metric, Estimate = round(.estimate, 3))
+  mat <- yardstick::conf_mat(classifier$pred, obs, pred)$table
+  A <- mat[1,1]
+  B <- mat[1,2]
+  C <- mat[2,1]
+  D <- mat[2,2]
+
+  tibble::tibble(
+    Metric     = c("Sensitivity", "Specificity"),
+    Estimate   = round(c(
+      A / (A + C),
+      D / (B + D)
+    ), 4),
+    ci95_lower = round(c(
+      prop.test(A, A + C, conf.level = 0.95)$conf.int[1],
+      prop.test(D, B + D, conf.level = 0.95)$conf.int[1]
+    ), 4),
+    ci95_upper = round(c(
+      prop.test(A, A + C, conf.level = 0.95)$conf.int[2],
+      prop.test(D, B + D, conf.level = 0.95)$conf.int[2]
+    ), 4)
+  )
 }
 
 #' Crossvalidation feature importance
@@ -159,4 +173,22 @@ crossvalidation_feature_importance <- function(classifier,
   } else {
     return(importance$importance)
   }
+}
+
+#' Crossvalidation predictive probabilities
+#'
+#' Given a classifier output by 'crossvalidate', return a tibble with one row
+#' for each training sample containing the sample name, observed class,
+#' predicted class, as well as the predicted probability of each class.
+#' @param classifier output from 'crossvalidate' function
+#' @export
+crossvalidation_predictive_probabilities <- function(classifier) {
+  tibble::tibble(
+    sample = rownames(classifier$trainingData),
+    obs    = classifier$trainingData$.outcome,
+    pred   = caret::predict.train(classifier, type = "raw")
+  ) %>%
+    dplyr::bind_cols(
+      caret::predict.train(classifier, type = "prob")
+    )
 }

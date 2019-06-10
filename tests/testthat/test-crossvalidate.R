@@ -84,3 +84,23 @@ test_that("crossvalidate gives a very high AUC when a clear signal is injected" 
 
   expect_gt(classifier$results$ROC, 0.95)
 })
+
+test_that("crossvalidation_predictive_probabilities produces an approproiate tbl", {
+  data_matrix <- as.matrix(pigs[,-1])
+  rownames(data_matrix) <- pigs$filename
+
+  labels      <- pigs[[1]] %>% stringr::str_sub(1, 2)
+  keep        <- labels %in% c("F0", "F3")
+
+  data_matrix <- data_matrix[keep,]
+  labels      <- labels[keep]
+
+  data_matrix[labels == "F3",] <- data_matrix[labels == "F3",] + 10000
+
+  classifier <- crossvalidate(data_matrix, labels)
+
+  pred_prob <- crossvalidation_predictive_probabilities(classifier)
+
+  expect_equal(nrow(pred_prob), nrow(data_matrix))
+  expect_equal(pred_prob$sample, rownames(data_matrix))
+})

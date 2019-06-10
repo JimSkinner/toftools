@@ -31,19 +31,24 @@ if(!file.exists(file)) {
 # {.tabset .tabset-fade}
 
 ```{r}
-tof <- purrr::quietly(load_tof)(file)$result %>%
+tof <- purrr::quietly(load_tof)(file)$result
+
+if (ncol(tof) == 1) {
+  stop(stringr::str_glue("This does not look like a ToF file: {file}"))
+}
+
+tof <- tof %>%
   # Add a column called 'label' containing T/H
   mutate(label = str_sub(sample, 1, 1)) %>%
   # Mode 'filename' & 'label' to first two columns
-  select(sample, label, everything()) %>%
-  sample_frac(1)
+  select(sample, label, everything())
 
 labels   <- tof$label
 
 sample_count <- tof %>%
   count(label, name = "number")
 
-knitr::kable(sample_count, format = "html", caption = "samples per class")
+knitr::kable(sample_count, caption = "samples per class")
 
 if (nrow(sample_count) != 2) {
   stop(paste0(file, ": Expected exactly two classes, found ", nrow(sample_count)))
@@ -52,6 +57,7 @@ if (nrow(sample_count) != 2) {
 
 ```{r results = "asis"}
 data_mat <- as.matrix(tof[,-(1:2)])
+rownames(data_mat) <- tof$sample
 
 models <- c(
   "xgbTree",
@@ -81,9 +87,11 @@ for (model in models) {
 
   print(crossvalidation_roc(classifier))
   cat("\n")
-  print(knitr::kable(crossvalidation_metrics(classifier), format = "html"))
+  print(knitr::kable(crossvalidation_metrics(classifier)))
   cat("\n")
   print(crossvalidation_feature_importance(classifier, n_features = 15))
+  cat('\n')
+  print(knitr::kable(crossvalidation_predictive_probabilities(classifier)))
   cat('\n')
 }
 ```
