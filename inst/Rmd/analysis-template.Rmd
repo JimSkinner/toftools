@@ -1,0 +1,89 @@
+---
+title: "`r basename(params$tof_file)`"
+output: html_document
+date: "`r Sys.time()`"
+params:
+  tof_file: "~/Projects/ToF/toftools-demo/data/Pump A Bk Chem_Area.txt"
+---
+
+```{r setup, warning = FALSE, message = FALSE, echo = FALSE}
+library(toftools)
+library(magrittr)
+library(purrr)
+library(stringr)
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
+
+file <- params$tof_file
+
+if (length(file) != 1) {
+  stop("Expected parameter 'tof_file' to contain a single file path")
+}
+
+if(!file.exists(file)) {
+  stop(paste0("Cannot find file: ", file))
+}
+```
+
+# {.tabset .tabset-fade}
+
+```{r}
+tof <- purrr::quietly(load_tof)(file)$result %>%
+  # Add a column called 'label' containing T/H
+  mutate(label = str_sub(sample, 1, 1)) %>%
+  # Mode 'filename' & 'label' to first two columns
+  select(sample, label, everything()) %>%
+  sample_frac(1)
+
+labels   <- tof$label
+
+sample_count <- tof %>%
+  count(label, name = "number")
+
+knitr::kable(sample_count, format = "html", caption = "samples per class")
+
+if (nrow(sample_count) != 2) {
+  stop(paste0(file, ": Expected exactly two classes, found ", nrow(sample_count)))
+}
+```
+
+```{r results = "asis"}
+data_mat <- as.matrix(tof[,-(1:2)])
+
+models <- c(
+  "xgbTree",
+  # "rf",
+  # "ranger",
+  "glmnet",
+  "gaussprRadial"
+  # "lda2"
+  # "nnet"
+)
+
+model_summaries <- c(
+  "extreme gradient boosting XGBoost (https://xgboost.readthedocs.io)",
+  # "random forest using ranger (https://github.com/imbs-hl/ranger)",
+  "logistic regression with elastic net regularisation using glmnet (https://cran.r-project.org/web/packages/glmnet/index.html)",
+  "Gaussian Process classifier radial basis kernel (using 'kernlab' R package')",
+  "Linear discriminant analysis"
+  # "Neural network using 'nnet' package"
+)
+names(model_summaries) <- models
+
+for (model in models) {
+  cat("\n## ", model, "\n")
+  cat(model_summaries[model], "\n")
+  
+  classifier <- crossvalidate(data_mat, labels, model = model, n_folds = 10)
+
+  print(crossvalidation_roc(classifier))
+  cat("\n")
+  print(knitr::kable(crossvalidation_metrics(classifier), format = "html"))
+  cat("\n")
+  print(crossvalidation_feature_importance(classifier, n_features = 15))
+  cat('\n')
+}
+```

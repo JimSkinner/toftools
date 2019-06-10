@@ -1,0 +1,29 @@
+Package: toftools
+Type: Package
+Title: A set of tools for dealing with ToF data
+Version: 1.1.0
+Author: Jim Skinner
+Maintainer: Jim Skinner <j.r.skinner@warwick.ac.uk>
+Description: Provides a set of tools for easily performing classification
+    with ToF data. In particular, 'analyse' takes a ToF file and automatically
+    produces a set of ROC curves, accuracy metrics, and the importance of
+    each molecule in making predictions.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    readr,
+    dplyr,
+    caret,
+    testthat,
+    yardstick,
+    ggplot2,
+    pROC,
+    tidyr,
+    magrittr,
+    rmarkdown,
+    stringr,
+    tools,
+    knitr,
+    purrr
+RoxygenNote: 6.1.1
