@@ -12,7 +12,8 @@ test_that("crossvalidate produces a trained classifier", {
     "glmnet",
     "gaussprRadial",
     "nnet",
-    "lda2"
+    "lda2",
+    "svmRadial"
   )
 
   for (model in models) {

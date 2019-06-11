@@ -60,30 +60,33 @@ data_mat <- as.matrix(tof[,-(1:2)])
 rownames(data_mat) <- tof$sample
 
 models <- c(
-  "xgbTree",
-  # "rf",
+  # "xgbTree",
+  "rf",
   # "ranger",
   "glmnet",
-  "gaussprRadial"
+  "gaussprRadial",
   # "lda2"
-  # "nnet"
+  "nnet",
+  "svmRadial"
 )
 
 model_summaries <- c(
-  "extreme gradient boosting XGBoost (https://xgboost.readthedocs.io)",
+  # "extreme gradient boosting XGBoost (https://xgboost.readthedocs.io)",
+  "random forest",
   # "random forest using ranger (https://github.com/imbs-hl/ranger)",
   "logistic regression with elastic net regularisation using glmnet (https://cran.r-project.org/web/packages/glmnet/index.html)",
   "Gaussian Process classifier radial basis kernel (using 'kernlab' R package')",
-  "Linear discriminant analysis"
-  # "Neural network using 'nnet' package"
+  # "Linear discriminant analysis",
+  "Neural network using 'nnet' package",
+  "Support Vecotr Machine (RBF kernel)"
 )
 names(model_summaries) <- models
 
 for (model in models) {
   cat("\n## ", model, "\n")
-  cat(model_summaries[model], "\n")
+  cat(model_summaries[model], "\n\n")
   
-  classifier <- crossvalidate(data_mat, labels, model = model, n_folds = 10)
+  classifier <- purrr::quietly(crossvalidate)(data_mat, labels, model = model, n_folds = 10)$result
 
   print(crossvalidation_roc(classifier))
   cat("\n")

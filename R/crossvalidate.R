@@ -58,6 +58,10 @@ crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10) 
     ),
     "lda2" = data.frame(
       dimen = 1
+    ),
+    "svmRadial" = data.frame(
+      sigma  = 0.1454651,
+      C = 0.25
     )
   )
 
