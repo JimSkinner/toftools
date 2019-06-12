@@ -90,7 +90,12 @@ crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10) 
 #' @export
 crossvalidation_roc <- function(classifier, title = "") {
   classifier_roc <- classifier$pred %>%
-    yardstick::roc_curve(obs, classifier$levels[1])
+    yardstick::roc_curve(truth = obs,
+                         classifier$levels[1],
+                         options = list(
+                           direction = "<",
+                           transpose = TRUE
+                         ))
 
   classifier_roc_ci <- pROC::ci(pROC::roc(
     response  = classifier$pred$obs,
@@ -124,19 +129,52 @@ crossvalidation_metrics <- function(classifier) {
   C <- mat[2,1]
   D <- mat[2,2]
 
+  Sensitivity = A/(A+C)
+  Specificity = D/(B+D)
+  Prevalence = (A+C)/(A+B+C+D)
+  PPV = (Sensitivity * Prevalence) / ((Sensitivity * Prevalence) + ((1-Specificity) * (1-Prevalence)))
+  NPV = (Specificity * (1-Prevalence)) / (((1-Sensitivity) * Prevalence) + ((Specificity) * (1-Prevalence)))
+
+  get_metrics <- function(split) {
+    rsample::analysis(split) %>%
+      dplyr::summarise(
+        sens = yardstick::sens_vec(obs, pred),
+        spec = yardstick::spec_vec(obs, pred),
+        ppv  = yardstick::ppv_vec(obs, pred),
+        npv  = yardstick::npv_vec(obs, pred)
+      )
+  }
+
+  boot <- rsample::bootstraps(classifier$pred, times = 2000) %>%
+    dplyr::mutate(metrics = purrr::map(splits, get_metrics)) %>%
+    tidyr::unnest(metrics)
+
+  ci95 <- boot %>%
+    dplyr::summarise(
+      sens_lower = quantile(sens, probs = c(0.05), na.rm = TRUE),
+      spec_lower = quantile(spec, probs = c(0.05), na.rm = TRUE),
+      ppv_lower  = quantile(ppv,  probs = c(0.05), na.rm = TRUE),
+      npv_lower  = quantile(npv,  probs = c(0.05), na.rm = TRUE),
+      sens_upper = quantile(sens, probs = c(0.95), na.rm = TRUE),
+      spec_upper = quantile(spec, probs = c(0.95), na.rm = TRUE),
+      ppv_upper  = quantile(ppv,  probs = c(0.95), na.rm = TRUE),
+      npv_upper  = quantile(npv,  probs = c(0.95), na.rm = TRUE)
+    )
+
   tibble::tibble(
-    Metric     = c("Sensitivity", "Specificity"),
-    Estimate   = round(c(
-      A / (A + C),
-      D / (B + D)
+    Metric     = c("Sensitivity", "Specificity", "PPV", "NPV"),
+    Estimate   = round(c(Sensitivity, Specificity, PPV, NPV), 4),
+    "Lower 95%CI" = round(c(
+      ci95$sens_lower,
+      ci95$spec_lower,
+      ci95$ppv_lower,
+      ci95$npv_lower
     ), 4),
-    ci95_lower = round(c(
-      prop.test(A, A + C, conf.level = 0.95)$conf.int[1],
-      prop.test(D, B + D, conf.level = 0.95)$conf.int[1]
-    ), 4),
-    ci95_upper = round(c(
-      prop.test(A, A + C, conf.level = 0.95)$conf.int[2],
-      prop.test(D, B + D, conf.level = 0.95)$conf.int[2]
+    "Upper 95%CI" = round(c(
+      ci95$sens_upper,
+      ci95$spec_upper,
+      ci95$ppv_upper,
+      ci95$npv_upper
     ), 4)
   )
 }
