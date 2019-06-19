@@ -100,7 +100,8 @@ crossvalidation_roc <- function(classifier, title = "") {
   classifier_roc_ci <- pROC::ci(pROC::roc(
     response  = classifier$pred$obs,
     predictor = classifier$pred[,classifier$levels[1]],
-    ci = TRUE
+    ci = TRUE,
+    direction = "<"
   ))
 
   ggplot2::autoplot(classifier_roc) +
