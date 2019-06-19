@@ -33,17 +33,6 @@ test_that("crossvalidation_roc produces a ggplot object", {
   expect_is(plt, "ggplot")
 })
 
-test_that("crossvalidation_metrics produces a data.frame", {
-  data_matrix <- pigs[,-1]
-  labels      <- pigs[[1]] %>% stringr::str_sub(1, 2)
-  keep        <- labels %in% c("F0", "F3")
-
-  model <- crossvalidate(data_matrix[keep,], labels[keep])
-
-  met <- crossvalidation_metrics(model)
-  expect_is(met, "data.frame")
-})
-
 test_that("crossvalidation_feature_importance gives expected output for different parameter values", {
   data_matrix <- pigs[,-1]
   labels      <- pigs[[1]] %>% stringr::str_sub(1, 2)

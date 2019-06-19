@@ -97,21 +97,17 @@ crossvalidation_roc <- function(classifier, title = "") {
                            transpose = TRUE
                          ))
 
-  classifier_roc_ci <- pROC::ci(pROC::roc(
-    response  = classifier$pred$obs,
-    predictor = classifier$pred[,classifier$levels[1]],
-    ci = TRUE,
-    direction = "<"
-  ))
+  auc <- crossvalidation_metrics(classifier) %>%
+    dplyr::filter(Metric == "AUC")
 
   ggplot2::autoplot(classifier_roc) +
     ggplot2::labs(title = title,
                   subtitle = paste0("AUC = ",
-                                    round(classifier_roc_ci[2], 3),
+                                    auc %>% dplyr::pull("Estimate") %>% round(3),
                                     " (95%CI ",
-                                    round(classifier_roc_ci[1], 3),
+                                    auc %>% dplyr::pull("Lower 95%CI") %>% round(3),
                                     "-",
-                                    round(classifier_roc_ci[3], 3),
+                                    auc %>% dplyr::pull("Upper 95%CI") %>% round(3),
                                     ")")
     )
 }
@@ -124,59 +120,63 @@ crossvalidation_roc <- function(classifier, title = "") {
 #' @return data frame of metrics
 #' @export
 crossvalidation_metrics <- function(classifier) {
-  mat <- yardstick::conf_mat(classifier$pred, obs, pred)$table
-  A <- mat[1,1]
-  B <- mat[1,2]
-  C <- mat[2,1]
-  D <- mat[2,2]
+  stopifnot(nrow(classifier$results) == 1) # Does not work for multiple HP vals
 
-  Sensitivity = A/(A+C)
-  Specificity = D/(B+D)
-  Prevalence = (A+C)/(A+B+C+D)
-  PPV = (Sensitivity * Prevalence) / ((Sensitivity * Prevalence) + ((1-Specificity) * (1-Prevalence)))
-  NPV = (Specificity * (1-Prevalence)) / (((1-Sensitivity) * Prevalence) + ((Specificity) * (1-Prevalence)))
+  pos_class <- classifier$levels[1]
 
-  get_metrics <- function(split) {
-    rsample::analysis(split) %>%
+  safe_auc <- purrr::possibly(yardstick::roc_auc, list(.estimate = NA_real_))
+
+  get_metrics <- function(pred) {
+    pred %>%
       dplyr::summarise(
         sens = yardstick::sens_vec(obs, pred),
         spec = yardstick::spec_vec(obs, pred),
         ppv  = yardstick::ppv_vec(obs, pred),
-        npv  = yardstick::npv_vec(obs, pred)
+        npv  = yardstick::npv_vec(obs, pred),
+        auc  = safe_auc(., obs, !!pos_class, options = list(transpose = TRUE, direction = "<"))$.estimate
       )
   }
 
-  boot <- rsample::bootstraps(classifier$pred, times = 2000) %>%
-    dplyr::mutate(metrics = purrr::map(splits, get_metrics)) %>%
+  get_boot_metrics <- function(split) {
+    rsample::analysis(split) %>%
+      get_metrics()
+  }
+
+  boot_tbl <- rsample::bootstraps(classifier$pred, times = 2000) %>%
+    dplyr::mutate(metrics = purrr::map(splits, get_boot_metrics)) %>%
     tidyr::unnest(metrics)
 
-  ci95 <- boot %>%
+  ci95_tbl <- boot_tbl %>%
     dplyr::summarise(
       sens_lower = quantile(sens, probs = c(0.05), na.rm = TRUE),
       spec_lower = quantile(spec, probs = c(0.05), na.rm = TRUE),
       ppv_lower  = quantile(ppv,  probs = c(0.05), na.rm = TRUE),
       npv_lower  = quantile(npv,  probs = c(0.05), na.rm = TRUE),
+      auc_lower  = quantile(auc,  probs = c(0.05), na.rm = TRUE),
       sens_upper = quantile(sens, probs = c(0.95), na.rm = TRUE),
       spec_upper = quantile(spec, probs = c(0.95), na.rm = TRUE),
       ppv_upper  = quantile(ppv,  probs = c(0.95), na.rm = TRUE),
-      npv_upper  = quantile(npv,  probs = c(0.95), na.rm = TRUE)
+      npv_upper  = quantile(npv,  probs = c(0.95), na.rm = TRUE),
+      auc_upper  = quantile(auc,  probs = c(0.95), na.rm = TRUE)
     )
 
   tibble::tibble(
-    Metric     = c("Sensitivity", "Specificity", "PPV", "NPV"),
-    Estimate   = round(c(Sensitivity, Specificity, PPV, NPV), 4),
-    "Lower 95%CI" = round(c(
-      ci95$sens_lower,
-      ci95$spec_lower,
-      ci95$ppv_lower,
-      ci95$npv_lower
-    ), 4),
-    "Upper 95%CI" = round(c(
-      ci95$sens_upper,
-      ci95$spec_upper,
-      ci95$ppv_upper,
-      ci95$npv_upper
-    ), 4)
+    Metric     = c("Sensitivity", "Specificity", "PPV", "NPV", "AUC"),
+    Estimate   = unlist(get_metrics(classifier$pred)),
+    "Lower 95%CI" = c(
+      ci95_tbl$sens_lower,
+      ci95_tbl$spec_lower,
+      ci95_tbl$ppv_lower,
+      ci95_tbl$npv_lower,
+      ci95_tbl$auc_lower
+    ),
+    "Upper 95%CI" = c(
+      ci95_tbl$sens_upper,
+      ci95_tbl$spec_upper,
+      ci95_tbl$ppv_upper,
+      ci95_tbl$npv_upper,
+      ci95_tbl$auc_upper
+    )
   )
 }
 
@@ -226,12 +226,14 @@ crossvalidation_feature_importance <- function(classifier,
 #' @param classifier output from 'crossvalidate' function
 #' @export
 crossvalidation_predictive_probabilities <- function(classifier) {
-  tibble::tibble(
-    sample = rownames(classifier$trainingData),
-    obs    = classifier$trainingData$.outcome,
-    pred   = caret::predict.train(classifier, type = "raw")
-  ) %>%
-    dplyr::bind_cols(
-      caret::predict.train(classifier, type = "prob")
-    )
+  params <- classifier$bestTune
+  best_performing_fold <- rep(TRUE, nrow(classifier$pred))
+  for (param in names(params)) {
+    non_best <- classifier$pred[,param] != params[[param]]
+    best_performing_fold[non_best] <- FALSE
+  }
+  classifier$pred[best_performing_fold,] %>%
+    dplyr::arrange(rowIndex) %>%
+    dplyr::mutate(sample = rownames(classifier$trainingData)) %>%
+    dplyr::select(sample, obs, pred, !!!classifier$levels)
 }
