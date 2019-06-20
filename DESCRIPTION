@@ -25,5 +25,6 @@ Imports:
     stringr,
     tools,
     knitr,
-    purrr
+    purrr,
+    rsample
 RoxygenNote: 6.1.1
