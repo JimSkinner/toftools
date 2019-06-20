@@ -78,7 +78,7 @@ model_summaries <- c(
   "Gaussian Process classifier radial basis kernel (using 'kernlab' R package')",
   # "Linear discriminant analysis",
   "Neural network using 'nnet' package",
-  "Support Vecotr Machine (RBF kernel)"
+  "Support Vector Machine (RBF kernel)"
 )
 names(model_summaries) <- models
 
