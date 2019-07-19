@@ -4,6 +4,7 @@ output: html_document
 date: "`r Sys.time()`"
 params:
   tof_file: "~/Projects/ToF/toftools-demo/data/Pump A Bk Chem_Area.txt"
+  tune: FALSE
 ---
 
 ```{r setup, warning = FALSE, message = FALSE, echo = FALSE}
@@ -86,7 +87,7 @@ for (model in models) {
   cat("\n## ", model, "\n")
   cat(model_summaries[model], "\n\n")
   
-  classifier <- purrr::quietly(crossvalidate)(data_mat, labels, model = model, n_folds = 10)$result
+  classifier <- purrr::quietly(crossvalidate)(data_mat, labels, model = model, n_folds = 10, tune = params$tune)$result
 
   print(crossvalidation_roc(classifier))
   cat("\n")
@@ -96,5 +97,15 @@ for (model in models) {
   cat('\n')
   print(knitr::kable(crossvalidation_predictive_probabilities(classifier)))
   cat('\n')
+  if (params$tune) {
+    cat("Predictive accuracy on different hyper-parameter settings (best performing selected):")
+    cat("\n")
+    tryCatch({
+      print(ggplot2::ggplot(classifier))
+    }, error = function(err) {
+      cat(err$message)
+    })
+    cat('\n')
+  }
 }
 ```

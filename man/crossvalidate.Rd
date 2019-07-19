@@ -4,7 +4,8 @@
 \alias{crossvalidate}
 \title{Cross-validate on a matrix of ToF data with labels}
 \usage{
-crossvalidate(data_matrix, labels, model = "xgbTree", n_folds = 10)
+crossvalidate(data_matrix, labels, model = "xgbTree", n_folds = 10,
+  tune = FALSE)
 }
 \arguments{
 \item{labels}{A character vector of class labels (shoulkd have 2 unique values)}
@@ -12,6 +13,8 @@ crossvalidate(data_matrix, labels, model = "xgbTree", n_folds = 10)
 \item{model}{The model to use}
 
 \item{n_folds}{number of folds in crossvalidation}
+
+\item{tune}{Whether to tune hyper-parameters (TRUE), or use defaults (FALSE)}
 
 \item{data_marix}{A matrix of ToF data}
 }

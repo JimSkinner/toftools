@@ -4,12 +4,15 @@
 \alias{analyse_dir}
 \title{Run 'analyse' on every '.txt' file in a directory}
 \usage{
-analyse_dir(tof_dir, pattern = "*.txt")
+analyse_dir(tof_dir, pattern = "*.txt", tune = FALSE)
 }
 \arguments{
 \item{tof_dir}{directory containing ToF files (names ending in .txt)}
 
 \item{pattern}{The filename patterns to match (default '*.txt')}
+
+\item{tune}{(optional logical, default FALSE) whether to tune hyper-parameters.
+If TRUE, will take a LOT more compute time.}
 }
 \value{
 a list of error messages; one per file.

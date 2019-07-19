@@ -31,13 +31,15 @@ test_that("Metric CIs contain Estimates, and are in [0, 1]", {
 test_that("Metrics for a synthetic set of predictions are correct", {
   demi_classifier <- list(
     pred = data.frame(
+      rowIndex = 1:8,
       pred = c("C0", "C0", "C0", "C1", "C1", "C1", "C1", "C0"),
       obs  = c("C0", "C0", "C0", "C0", "C1", "C1", "C1", "C1"),
       C0   = c(0.9,  0.8,  0.7,  0.4,  0.1,  0.2,  0.3,  0.6),
       C1   = c(0.1,  0.2,  0.3,  0.6,  0.9,  0.8,  0.7,  0.4),
       hp_1 = 1 # Dummy hyperparameter (code might break without at-least 1 hp)
     ),
-    levels = c("C0", "C1")
+    levels = c("C0", "C1"),
+    trainingData = matrix(rnorm(8), ncol = 1) %>% magrittr::set_rownames(1:8)
   )
 
   metrics <- crossvalidation_metrics(demi_classifier)

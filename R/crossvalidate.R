@@ -12,11 +12,14 @@
 #' @param labels A character vector of class labels (shoulkd have 2 unique values)
 #' @param model The model to use
 #' @param n_folds number of folds in crossvalidation
+#' @param tune Whether to tune hyper-parameters (TRUE), or use defaults (FALSE)
 #' @return A caret::train object
 #' @export
-crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10) {
+crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10, tune = FALSE) {
   stopifnot(nrow(data_matrix) == length(labels))
   stopifnot(length(unique(labels)) == 2)
+
+  data_matrix <- drop_nearly_all_zero(as.matrix(data_matrix), 0.5)
 
   train_control <- caret::trainControl(
     method          = "cv",
@@ -27,57 +30,68 @@ crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10) 
     savePredictions = TRUE
   )
 
-  hyperparameters <- list(
-    "xgbTree" = data.frame(
-        nrounds = 50,
-        max_depth = 1,
-        eta = 0.3,
-        gamma = 0,
-        colsample_bytree = 0.6,
-        min_child_weight = 1,
-        subsample = 0.75
+  if (!tune) {
+    hyperparameters <- list(
+      "xgbTree" = data.frame(
+          nrounds = 50,
+          max_depth = 1,
+          eta = 0.3,
+          gamma = 0,
+          colsample_bytree = 0.6,
+          min_child_weight = 1,
+          subsample = 0.75
+        ),
+      "ranger" = data.frame(
+        mtry = 2,
+        splitrule = "extratrees",
+        min.node.size = 1.
       ),
-    "ranger" = data.frame(
-      mtry = 2,
-      splitrule = "extratrees",
-      min.node.size = 1.
-    ),
-    "glmnet" = data.frame(
-        alpha = 0.325,
-        lambda = 0.1
+      "glmnet" = data.frame(
+          alpha = 0.325,
+          lambda = 0.1
+        ),
+      "gaussprRadial" = data.frame(
+        sigma = 0.2
       ),
-    "gaussprRadial" = data.frame(
-      sigma = 0.2
-    ),
-    "nnet" = data.frame(
-      size = 5,
-      decay = 0.1
-    ),
-    "rf" = data.frame(
-      mtry = 5
-    ),
-    "lda2" = data.frame(
-      dimen = 1
-    ),
-    "svmRadial" = data.frame(
-      sigma  = 0.1454651,
-      C = 0.25
+      "nnet" = data.frame(
+        size = 5,
+        decay = 0.1
+      ),
+      "rf" = data.frame(
+        mtry = 5
+      ),
+      "lda2" = data.frame(
+        dimen = 1
+      ),
+      "svmRadial" = data.frame(
+        sigma  = 0.1454651,
+        C = 0.25
+      )
     )
-  )
 
-  if(!(model %in% names(hyperparameters))) stop(paste0("'model' should be one of ", paste0(names(hyperparameters), collapse = ", ")))
+    if(!(model %in% names(hyperparameters))) stop(paste0("'model' should be one of ", paste0(names(hyperparameters), collapse = ", ")))
 
-  data_matrix <- drop_nearly_all_zero(as.matrix(data_matrix), 0.5)
-
-  caret::train(
-    x = data_matrix,
-    y = labels,
-    trControl = train_control,
-    method    = model,
-    metric    = "ROC",
-    tuneGrid  = hyperparameters[[model]],
-    preProcess = c("center", "scale")
-  )
+    classifier <- caret::train(
+      x = data_matrix,
+      y = labels,
+      trControl = train_control,
+      method    = model,
+      metric    = "ROC",
+      tuneGrid  = hyperparameters[[model]],
+      preProcess = c("center", "scale")
+    )
+  } else {
+    classifier <- caret::train(
+      x = data_matrix,
+      y = labels,
+      trControl = train_control,
+      method    = model,
+      metric    = "ROC",
+      tuneLength = 4,
+      preProcess = c("center", "scale")
+    )
+  }
+  return(classifier)
 }
 
 #' Crossvalidation ROC curve
@@ -89,7 +103,8 @@ crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10) 
 #' @return a ROC curve
 #' @export
 crossvalidation_roc <- function(classifier, title = "") {
-  classifier_roc <- classifier$pred %>%
+  classifier_roc <- classifier %>%
+    crossvalidation_predictive_probabilities() %>%
     yardstick::roc_curve(truth = obs,
                          classifier$levels[1],
                          options = list(
@@ -120,7 +135,7 @@ crossvalidation_roc <- function(classifier, title = "") {
 #' @return data frame of metrics
 #' @export
 crossvalidation_metrics <- function(classifier) {
-  stopifnot(nrow(classifier$results) == 1) # Does not work for multiple HP vals
+  # stopifnot(nrow(classifier$results) == 1) # Does not work for multiple HP vals
 
   pos_class <- classifier$levels[1]
 
@@ -142,7 +157,9 @@ crossvalidation_metrics <- function(classifier) {
       get_metrics()
   }
 
-  boot_tbl <- rsample::bootstraps(classifier$pred, times = 2000) %>%
+  boot_tbl <- classifier %>%
+    crossvalidation_predictive_probabilities() %>%
+    rsample::bootstraps(times = 2000) %>%
     dplyr::mutate(metrics = purrr::map(splits, get_boot_metrics)) %>%
     tidyr::unnest(metrics)
 

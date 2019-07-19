@@ -4,10 +4,13 @@
 \alias{analyse}
 \title{Produce an html analysis of a ToF file}
 \usage{
-analyse(tof_file)
+analyse(tof_file, tune = FALSE)
 }
 \arguments{
 \item{tof_file}{location of the ToF file}
+
+\item{tune}{(optional logical, default FALSE) whether to tune hyper-parameters.
+If TRUE, will take a LOT more compute time.}
 }
 \description{
 Given a ToF file, train a variety of classifiers & look at cross-validation
