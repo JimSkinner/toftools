@@ -13,9 +13,13 @@
 #' @param model The model to use
 #' @param n_folds number of folds in crossvalidation
 #' @param tune Whether to tune hyper-parameters (TRUE), or use defaults (FALSE)
+#' @param hyperparams One of 'tof' or 'gcims' whether the default hyper-
+#'   parameters have been picked for tof data or gc-ims data. No effect if tune
+#'   = TRUE.
 #' @return A caret::train object
 #' @export
-crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10, tune = FALSE) {
+crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10,
+                          tune = FALSE, hyperparams = "tof") {
   stopifnot(nrow(data_matrix) == length(labels))
   stopifnot(length(unique(labels)) == 2)
 
@@ -30,44 +34,50 @@ crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10, 
     savePredictions = TRUE
   )
 
+  if (model == "glmnet") {
+    preProcess <- c("center", "scale")
+  } else {
+    preProcess <- c("center", "scale", "BoxCox")
+  }
+
   if (!tune) {
-    hyperparameters <- list(
-      "xgbTree" = data.frame(
-          nrounds = 50,
-          max_depth = 1,
-          eta = 0.3,
-          gamma = 0,
-          colsample_bytree = 0.6,
-          min_child_weight = 1,
-          subsample = 0.75
-        ),
-      "ranger" = data.frame(
-        mtry = 2,
-        splitrule = "extratrees",
-        min.node.size = 1.
-      ),
-      "glmnet" = data.frame(
-          alpha = 0.325,
-          lambda = 0.1
-        ),
-      "gaussprRadial" = data.frame(
-        sigma = 0.2
-      ),
-      "nnet" = data.frame(
-        size = 5,
-        decay = 0.1
-      ),
-      "rf" = data.frame(
-        mtry = 5
-      ),
-      "lda2" = data.frame(
-        dimen = 1
-      ),
-      "svmRadial" = data.frame(
-        sigma  = 0.1454651,
-        C = 0.25
+    if (hyperparams == "tof") {
+      hyperparameters <- list(
+        "xgbTree"       = data.frame(nrounds = 50,
+                                     max_depth = 1,
+                                     eta = 0.3,
+                                     gamma = 0,
+                                     colsample_bytree = 0.6,
+                                     min_child_weight = 1,
+                                     subsample = 0.75),
+        "ranger"        = data.frame(mtry = 2,
+                                     splitrule = "extratrees",
+                                     min.node.size = 1),
+        "glmnet"        = data.frame(alpha = 0.325,
+                                     lambda = 0.1),
+        "gaussprRadial" = data.frame(sigma = 0.2),
+        "nnet"          = data.frame(size = 5,
+                                     decay = 0.1),
+        "rf"            = data.frame(mtry = 5),
+        "lda2"          = data.frame(dimen = 1),
+        "svmRadial"     = data.frame(sigma  = 0.1454651,
+                                     C = 0.25)
       )
-    )
+    } else if (hyperparams == "gcims") {
+      hyperparameters <- list(
+        "xgbTree"       = data.frame(nrounds = 50,
+                                     max_depth = 2,
+                                     eta = 0.4,
+                                     gamma = 0,
+                                     colsample_bytree = 0.6,
+                                     min_child_weight = 1,
+                                     subsample = 1),
+        "glmnet"        = data.frame(alpha = 1,
+                                     lambda = 0.1475432)
+      )
+    } else {
+      stop("hyperparams must be one of 'tof'/'gcims'")
+    }
 
     if(!(model %in% names(hyperparameters))) stop(paste0("'model' should be one of ", paste0(names(hyperparameters), collapse = ", ")))
 
@@ -78,7 +88,7 @@ crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10, 
       method    = model,
       metric    = "ROC",
       tuneGrid  = hyperparameters[[model]],
-      preProcess = c("center", "scale")
+      preProcess = preProcess
     )
   } else {
     classifier <- caret::train(
@@ -88,7 +98,7 @@ crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10, 
       method    = model,
       metric    = "ROC",
       tuneLength = 4,
-      preProcess = c("center", "scale")
+      preProcess = preProcess
     )
   }
   return(classifier)

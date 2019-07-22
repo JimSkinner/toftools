@@ -43,3 +43,57 @@ analyse_dir <- function(tof_dir, pattern = "*.txt", tune = FALSE) {
   list.files(tof_dir, pattern = pattern, full.names = TRUE) %>%
     purrr::map(~ purrr::safely(purrr::partial(analyse, tune = tune))(.x)$error)
 }
+
+#' Produce a report on the predictive accuracy of a fdirectory of pre-processed
+#' GC-IMS data.
+#'
+#' @param dir directory containing pre-processed GC-IMS files
+#' @param pattern (optional string, default '*.csv') File extension of GC-IMS files
+#' @export
+analyse_GCIMS <- function(dir, pattern = "*.csv") {
+
+  ## TODO: Interactive dir chooser
+
+  files <- list.files(dir, pattern = pattern, full.names = TRUE)
+
+  if (length(files) == 0) {
+    stop(stringr::str_glue("No files matching pattern ({pattern})"))
+  }
+
+  ## Build class labels using 1st letter of filenames (expect 2 unique)
+  label <- basename(files) %>%
+    stringr::str_extract("[a-zA-Z]") %>%  # Take out 1st letter in the filename
+    as.factor()                           # Classes in alphabetic order
+
+  if (length(unique(label)) != 2) {
+    stop(stringr::str_glue("Expected 2 unique 1st letter file names. Found: {length(unique(label)) != 2}"))
+  }
+
+  ## Load all GCIMS data into a matrix
+
+  # TODO: Print a good error message if it is not a pre-processed GCIMS file.
+
+  prototype <- read_cropped_breath(files[[1]])
+  d <- length(prototype)
+
+  breath_mat <- files %>%
+    vapply(read_cropped_breath, numeric(d)) %>%
+    t()
+
+  rownames(breath_mat) <- basename(files)
+
+  ## Pre-process the data matrix
+  # TODO: Remove low IQR, etc..
+
+  ## Render the gcims analysis template (pass matrix & labels as params)
+  template <- system.file("Rmd", "analysis-template-gcims.Rmd", package = "toftools")
+  rmarkdown::render(
+    input = template,
+    output_file = "gcims-analysis.html",
+    output_dir  = dir,
+    params = list(
+      X = breath_mat,
+      y = label
+    )
+  )
+}

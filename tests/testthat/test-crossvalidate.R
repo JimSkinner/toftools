@@ -22,6 +22,40 @@ test_that("crossvalidate produces a trained classifier", {
   }
 })
 
+test_that("crossvalidate with default gcims hyper-parameters works as expected", {
+  data_matrix <- pigs[,-1]
+  labels      <- pigs[[1]] %>% stringr::str_sub(1, 2)
+  keep        <- labels %in% c("F0", "F3")
+
+  models <- c(
+    "xgbTree",
+    "glmnet"
+  )
+
+  for (model in models) {
+    classifier <- crossvalidate(data_matrix[keep,], labels[keep], model = model,
+                                hyperparams = "gcims")
+    expect_is(classifier, "train")
+  }
+})
+
+test_that("crossvalidate can tune hyper-parameters", {
+  data_matrix <- pigs[,-1]
+  labels      <- pigs[[1]] %>% stringr::str_sub(1, 2)
+  keep        <- labels %in% c("F0", "F3")
+
+  models <- c(
+    "xgbTree",
+    "glmnet"
+  )
+
+  for (model in models) {
+    classifier <- crossvalidate(data_matrix[keep,], labels[keep], model = model,
+                                tune = TRUE)
+    expect_is(classifier, "train")
+  }
+})
+
 test_that("crossvalidation_roc produces a ggplot object", {
   data_matrix <- pigs[,-1]
   labels      <- pigs[[1]] %>% stringr::str_sub(1, 2)

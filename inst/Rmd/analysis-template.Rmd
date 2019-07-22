@@ -3,7 +3,7 @@ title: "`r basename(params$tof_file)`"
 output: html_document
 date: "`r Sys.time()`"
 params:
-  tof_file: "~/Projects/ToF/toftools-demo/data/Pump A Bk Chem_Area.txt"
+  tof_file: ""
   tune: FALSE
 ---
 

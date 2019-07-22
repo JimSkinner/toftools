@@ -26,5 +26,7 @@ Imports:
     tools,
     knitr,
     purrr,
-    rsample
+    rsample,
+    imager,
+    forcats
 RoxygenNote: 6.1.1
