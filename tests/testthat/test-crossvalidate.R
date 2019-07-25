@@ -84,13 +84,13 @@ test_that("crossvalidation_feature_importance gives expected output for differen
                                      n_features = 10,
                                      output_dataframe = TRUE) %>%
     dim() %>%
-    expect_equal(c(10, 1))
+    expect_equal(c(10, 2))
 
   crossvalidation_feature_importance(classifier,
                                      n_features = 5,
                                      override_names = LETTERS[1:5],
                                      output_dataframe = TRUE) %>%
-    rownames() %>%
+    dplyr::pull(feature) %>%
     expect_equal(LETTERS[1:5])
 })
 
