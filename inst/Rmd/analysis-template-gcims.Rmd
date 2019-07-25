@@ -59,8 +59,27 @@ for (model in models) {
   cat("\n")
   print(knitr::kable(crossvalidation_metrics(classifier)))
   cat("\n")
-  # print(crossvalidation_feature_importance(classifier, n_features = 15))
-  # cat('\n')
+  
+
+  reference_mat <- vec_to_mat(X[1,]) %>% coarsen(900, 900)
+  importance <- crossvalidation_feature_importance(classifier, output_dataframe = TRUE) %>%
+    filter(importance > 0) %>%
+    mutate(
+      GC  = feature %>% str_remove(":.*$") %>% as.numeric(),
+      IMS = feature %>% str_remove("^.*:") %>% as.numeric()
+    )
+
+  print(plot_features(importance,
+                      reference_mat,
+                      ims_transformation = "log1p"))
+    
+  print(plot_features(importance,
+                      reference_mat,
+                      ims_transformation = "log1p",
+                      discretise_features = TRUE))
+    
+  cat('\n')
+  
   print(knitr::kable(crossvalidation_predictive_probabilities(classifier)))
   cat('\n')
   if (params$tune) {

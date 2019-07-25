@@ -241,7 +241,10 @@ crossvalidation_feature_importance <- function(classifier,
   if (!output_dataframe) {
     return(ggplot(importance))
   } else {
-    return(importance$importance)
+    return(tibble::tibble(
+      feature    = rownames(importance$importance),
+      importance = importance$importance$Overall
+    ))
   }
 }
 

@@ -73,14 +73,14 @@ analyse_GCIMS <- function(dir, pattern = "*.csv") {
 
   # TODO: Print a good error message if it is not a pre-processed GCIMS file.
 
-  prototype <- read_cropped_breath(files[[1]])
+  prototype <- read_cropped_gcims(files[[1]])
   d <- length(prototype)
 
-  breath_mat <- files %>%
-    vapply(read_cropped_breath, numeric(d)) %>%
+  gcims_mat <- files %>%
+    vapply(read_cropped_gcims, numeric(d)) %>%
     t()
 
-  rownames(breath_mat) <- basename(files)
+  rownames(gcims_mat) <- basename(files)
 
   ## Pre-process the data matrix
   # TODO: Remove low IQR, etc..
@@ -92,7 +92,7 @@ analyse_GCIMS <- function(dir, pattern = "*.csv") {
     output_file = "gcims-analysis.html",
     output_dir  = dir,
     params = list(
-      X = breath_mat,
+      X = gcims_mat,
       y = label
     )
   )
