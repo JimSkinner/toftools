@@ -22,3 +22,8 @@ analyse("path/to/tof/file.txt")
 analyse_dir("path/to/tof")
 ```
 
+For GCIMS data, use 'analyse_GCIMS':
+``` r
+analyse_GCIMS("path/to/directory")
+```
+there the directory is expected to contain pre-processed GC-IMS data (as output by the pre-processing pipeline). The first letter of the filenames will be taken as the class of interest, and there should ony be 2 unique first letters.
