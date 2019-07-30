@@ -88,6 +88,8 @@ vec_to_tbl <- function(gcims_vec) {
 #'
 #' Convert a GCIMS vector with informative column names into a GCIMS matrix
 #'
+#' @param gcims_vec a names vector cotnaining a gcims measurement
+#'
 #' @export
 vec_to_mat <- function(gcims_vec) {
   stopifnot(is.vector(gcims_vec))
