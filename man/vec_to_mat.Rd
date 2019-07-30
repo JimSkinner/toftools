@@ -6,6 +6,9 @@
 \usage{
 vec_to_mat(gcims_vec)
 }
+\arguments{
+\item{gcims_vec}{a names vector cotnaining a gcims measurement}
+}
 \description{
 Convert a GCIMS vector with informative column names into a GCIMS matrix
 }
