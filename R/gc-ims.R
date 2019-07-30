@@ -120,24 +120,24 @@ vec_to_mat <- function(gcims_vec) {
 }
 
 gcims_feature_locations <- function(reference_mat, importance, discrete = FALSE) {
-  importance$GC  = importance$feature %>% str_remove(":.*$") %>% as.numeric()
-  importance$IMS = importance$feature %>% str_remove("^.*:") %>% as.numeric()
+  importance$GC  = importance$feature %>% stringr::str_remove(":.*$") %>% as.numeric()
+  importance$IMS = importance$feature %>% stringr::str_remove("^.*:") %>% as.numeric()
 
-  plt <- plot_features(p_vals,
+  plt <- toftools::plot_features(p_vals,
                        reference_mat,
                        n_keep,
                        TRUE,
                        ims_transformation = "log1p") +
-    labs(title = str_glue("Machine {machine}, {n_keep} features"),
+    ggplot2::labs(title = stringr::str_glue("Machine {machine}, {n_keep} features"),
          colour = "p value")
 
-        plt2 <- plot_features(p_vals,
+        plt2 <- toftools::plot_features(p_vals,
                          reference_mat,
                          n_keep,
                          TRUE,
                          ims_transformation = "log1p",
                          discretise_features = TRUE) +
-      labs(title = str_glue("Machine {machine}, {n_keep} features"),
+      ggplot2::labs(title = stringr::str_glue("Machine {machine}, {n_keep} features"),
            colour = "p value")
 
 }
