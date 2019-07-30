@@ -29,5 +29,6 @@ Imports:
     rsample,
     imager,
     forcats,
-    viridis
+    viridis,
+    e1071
 RoxygenNote: 6.1.1
