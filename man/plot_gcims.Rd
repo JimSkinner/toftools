@@ -11,7 +11,17 @@ plot_gcims(gcims, names = character(0), subsample = 1,
 \arguments{
 \item{gcims}{A 'gcims' matrix, or a list of such matrices}
 
+\item{names}{optional character vector to give titles when plotting multiple matrices}
+
 \item{subsample}{(integer) Sub-sample 1-in-`subsample' pixels}
+
+\item{max_signal}{maximum signal plotted (higher vals are capped)}
+
+\item{nrow}{number of rows when plotting multiple matrices}
+
+\item{ncol}{number of cols when plotting multiple matrices}
+
+\item{ims_transformation}{optional transformation to apply (passed to scale fill 'trans' argument). "log1p" is useful.}
 }
 \value{
 ggplot object plotting the matrices

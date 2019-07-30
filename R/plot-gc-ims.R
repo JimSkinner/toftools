@@ -1,6 +1,11 @@
 #' Plot one or more GC-IMS matrices
 #' @param gcims A 'gcims' matrix, or a list of such matrices
+#' @param names optional character vector to give titles when plotting multiple matrices
 #' @param subsample (integer) Sub-sample 1-in-`subsample' pixels
+#' @param max_signal maximum signal plotted (higher vals are capped)
+#' @param nrow number of rows when plotting multiple matrices
+#' @param ncol number of cols when plotting multiple matrices
+#' @param ims_transformation optional transformation to apply (passed to scale fill 'trans' argument). "log1p" is useful.
 #' @return ggplot object plotting the matrices
 #' @export
 plot_gcims <- function(gcims, names = character(0), subsample=1, max_signal=Inf, nrow = NULL, ncol = NULL, ims_transformation = "identity") {
