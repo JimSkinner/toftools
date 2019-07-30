@@ -73,17 +73,14 @@ analyse_GCIMS <- function(dir, pattern = "*.csv") {
 
   # TODO: Print a good error message if it is not a pre-processed GCIMS file.
 
-  prototype <- read_cropped_gcims(files[[1]])
+  prototype <- toftools:::read_cropped_gcims(files[[1]])
   d <- length(prototype)
 
   gcims_mat <- files %>%
-    vapply(read_cropped_gcims, numeric(d)) %>%
+    vapply(toftools:::read_cropped_gcims, numeric(d)) %>%
     t()
 
   rownames(gcims_mat) <- basename(files)
-
-  ## Pre-process the data matrix
-  # TODO: Remove low IQR, etc..
 
   ## Render the gcims analysis template (pass matrix & labels as params)
   template <- system.file("Rmd", "analysis-template-gcims.Rmd", package = "toftools")
