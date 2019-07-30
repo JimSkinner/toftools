@@ -28,5 +28,6 @@ Imports:
     purrr,
     rsample,
     imager,
-    forcats
+    forcats,
+    viridis
 RoxygenNote: 6.1.1
