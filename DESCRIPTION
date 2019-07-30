@@ -30,5 +30,10 @@ Imports:
     imager,
     forcats,
     viridis,
-    e1071
+    e1071,
+    glmnet,
+    xgboost,
+    randomForest,
+    kernlab,
+    nnet
 RoxygenNote: 6.1.1
