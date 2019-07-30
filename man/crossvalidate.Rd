@@ -8,6 +8,8 @@ crossvalidate(data_matrix, labels, model = "xgbTree", n_folds = 10,
   tune = FALSE, hyperparams = "tof")
 }
 \arguments{
+\item{data_matrix}{A matrix of ToF data}
+
 \item{labels}{A character vector of class labels (shoulkd have 2 unique values)}
 
 \item{model}{The model to use}
@@ -19,8 +21,6 @@ crossvalidate(data_matrix, labels, model = "xgbTree", n_folds = 10,
 \item{hyperparams}{One of 'tof' or 'gcims' whether the default hyper-
 parameters have been picked for tof data or gc-ims data. No effect if tune
 = TRUE.}
-
-\item{data_marix}{A matrix of ToF data}
 }
 \value{
 A caret::train object

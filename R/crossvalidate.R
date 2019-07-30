@@ -8,7 +8,7 @@
 #' dataset. #' This can be used to make further predictions on new data, such as
 #' a validation set.
 #'
-#' @param data_marix A matrix of ToF data
+#' @param data_matrix A matrix of ToF data
 #' @param labels A character vector of class labels (shoulkd have 2 unique values)
 #' @param model The model to use
 #' @param n_folds number of folds in crossvalidation
