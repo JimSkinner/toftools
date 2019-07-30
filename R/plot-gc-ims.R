@@ -91,11 +91,13 @@ plot_gcims <- function(gcims, names = character(0), subsample=1, max_signal=Inf,
 #' plots the values over a reference gcims matrix. Can be used to show feature
 #' importance/p-values.
 #'
-#' @param features vector of feature values (importance)
-#' @param reference_mat gcims matrix over which to plot the features
+#' @param importance vector of feature values (importance)
+#' @param reference_gcims gcims matrix over which to plot the features
 #' @param n_features (optional) plot only the top n_features
 #' @param reverse_values (optional, logical) Consider small feature values as
 #'   'big' for the purpose of the colour scale and picking the top n_features
+#' @param discretise_features show a ret point over each feature, instead of a
+#'   colour scale
 #' @param ... passed to plot_gcims
 #' @return gcims ggplot overlayed with feature values at the correct locations
 #' @export
