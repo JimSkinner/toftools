@@ -69,14 +69,14 @@ for (model in models) {
       IMS = feature %>% str_remove("^.*:") %>% as.numeric()
     )
 
-  print(plot_features(importance,
-                      reference_mat,
-                      ims_transformation = "log1p"))
+  print(toftools:::plot_features(importance,
+                                 reference_mat,
+                                 ims_transformation = "log1p"))
     
-  print(plot_features(importance,
-                      reference_mat,
-                      ims_transformation = "log1p",
-                      discretise_features = TRUE))
+  print(toftools:::plot_features(importance,
+                                 reference_mat,
+                                 ims_transformation = "log1p",
+                                 discretise_features = TRUE))
     
   cat('\n')
   

@@ -40,7 +40,7 @@ mat_to_vec <- function (gcims_mat) {
   if (is.null(colnames(gcims_mat)))
     colnames(gcims_mat) <- paste0("IMS", seq_len(ncol(gcims_mat)))
 
-  vecnames <- toftools::mat_names_to_vec(dimnames(gcims_mat))
+  vecnames <- toftools:::mat_names_to_vec(dimnames(gcims_mat))
 
   c(gcims_mat) %>%
     magrittr::set_names(vecnames)
@@ -55,10 +55,10 @@ read_cropped_gcims <- function(file, coarsen = 0) {
 
   if (coarsen > 0) {
     mat <- mat %>%
-      toftools::coarsen(size_GC = d_GC, size_IMS = d_IMS)
+      toftools:::coarsen(size_GC = d_GC, size_IMS = d_IMS)
   }
 
-  toftools::mat_to_vec(mat)
+  toftools:::mat_to_vec(mat)
 }
 
 #' Convert a GCIMS vector to a tbl
@@ -94,7 +94,7 @@ vec_to_mat <- function(gcims_vec) {
   stopifnot(!is.null(names(gcims_vec)))
   stopifnot(!any(duplicated(names(gcims_vec))))
 
-  gcims_df <- vec_to_tbl(gcims_vec)
+  gcims_df <- toftools:::vec_to_tbl(gcims_vec)
 
   gcims_mat <- matrix(NA_real_,
                        nrow = length(unique(gcims_df$GC)),
