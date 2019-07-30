@@ -11,7 +11,7 @@ analyse <- function(tof_file, tune = FALSE) {
   tof_file <- normalizePath(tof_file)
 
   if (!file.exists(tof_file)) {
-    stop(pate0("File does not exist: ", tof_file))
+    stop(paste0("File does not exist: ", tof_file))
   }
 
   template <- system.file("Rmd", "analysis-template.Rmd", package = "toftools")
