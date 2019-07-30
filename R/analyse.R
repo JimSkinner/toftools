@@ -44,7 +44,7 @@ analyse_dir <- function(tof_dir, pattern = "*.txt", tune = FALSE) {
     purrr::map(~ purrr::safely(purrr::partial(analyse, tune = tune))(.x)$error)
 }
 
-#' Produce a report on the predictive accuracy of a fdirectory of pre-processed
+#' Produce a report on the predictive accuracy of a directory of pre-processed
 #' GC-IMS data.
 #'
 #' @param dir directory containing pre-processed GC-IMS files

@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse.R
 \name{analyse_GCIMS}
 \alias{analyse_GCIMS}
-\title{Produce a report on the predictive accuracy of a fdirectory of pre-processed
+\title{Produce a report on the predictive accuracy of a directory of pre-processed
 GC-IMS data.}
 \usage{
 analyse_GCIMS(dir, pattern = "*.csv")
@@ -13,6 +13,6 @@ analyse_GCIMS(dir, pattern = "*.csv")
 \item{pattern}{(optional string, default '*.csv') File extension of GC-IMS files}
 }
 \description{
-Produce a report on the predictive accuracy of a fdirectory of pre-processed
+Produce a report on the predictive accuracy of a directory of pre-processed
 GC-IMS data.
 }
