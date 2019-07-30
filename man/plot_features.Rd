@@ -8,16 +8,19 @@ plot_features(importance, reference_gcims, n_features = 0,
   reverse_values = FALSE, discretise_features = FALSE, ...)
 }
 \arguments{
+\item{importance}{vector of feature values (importance)}
+
+\item{reference_gcims}{gcims matrix over which to plot the features}
+
 \item{n_features}{(optional) plot only the top n_features}
 
 \item{reverse_values}{(optional, logical) Consider small feature values as
 'big' for the purpose of the colour scale and picking the top n_features}
 
+\item{discretise_features}{show a ret point over each feature, instead of a
+colour scale}
+
 \item{...}{passed to plot_gcims}
-
-\item{features}{vector of feature values (importance)}
-
-\item{reference_mat}{gcims matrix over which to plot the features}
 }
 \value{
 gcims ggplot overlayed with feature values at the correct locations
