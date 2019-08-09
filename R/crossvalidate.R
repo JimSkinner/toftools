@@ -35,9 +35,9 @@ crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10,
   )
 
   if (model == "glmnet") {
-    preProcess <- c("center", "scale")
-  } else {
     preProcess <- c("center", "scale", "BoxCox")
+  } else {
+    preProcess <- c("center", "scale")
   }
 
   if (!tune) {
