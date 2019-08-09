@@ -87,24 +87,33 @@ for (model in models) {
   cat("\n## ", model, "\n")
   cat(model_summaries[model], "\n\n")
   
-  classifier <- purrr::quietly(crossvalidate)(data_mat, labels, model = model, n_folds = 10, tune = params$tune)$result
-
-  print(crossvalidation_roc(classifier))
-  cat("\n")
-  print(knitr::kable(crossvalidation_metrics(classifier)))
-  cat("\n")
-  print(crossvalidation_feature_importance(classifier, n_features = 15))
-  cat('\n')
-  print(knitr::kable(crossvalidation_predictive_probabilities(classifier)))
-  cat('\n')
-  if (params$tune) {
-    cat("Predictive accuracy on different hyper-parameter settings (best performing selected):")
+  success <- FALSE
+  try({
+    classifier <- purrr::quietly(crossvalidate)(data_mat, labels, model = model, n_folds = 10, tune = params$tune)$result
+    success <- TRUE
+  })
+    
+  if (success) {
+    print(crossvalidation_roc(classifier))
     cat("\n")
-    tryCatch({
-      print(ggplot2::ggplot(classifier))
-    }, error = function(err) {
-      cat(err$message)
-    })
+    print(knitr::kable(crossvalidation_metrics(classifier)))
+    cat("\n")
+    print(crossvalidation_feature_importance(classifier, n_features = 15))
+    cat('\n')
+    print(knitr::kable(crossvalidation_predictive_probabilities(classifier)))
+    cat('\n')
+    if (params$tune) {
+      cat("Predictive accuracy on different hyper-parameter settings (best performing selected):")
+      cat("\n")
+      tryCatch({
+        print(ggplot2::ggplot(classifier))
+      }, error = function(err) {
+        cat(err$message)
+      })
+      cat('\n')
+    }
+  } else {
+    print("Error fitting classifier")
     cat('\n')
   }
 }
