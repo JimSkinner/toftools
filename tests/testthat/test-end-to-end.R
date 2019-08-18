@@ -5,6 +5,6 @@ test_that("Calling 'analyse' on a TOF file produces a report without errors", {
   outfile <- "../../data-raw/coeliac_height.html"
   analyse(infile)
 
-  expect_that(file.exists(outfile))
+  expect_true(file.exists(outfile))
   file.remove(outfile)
 })
