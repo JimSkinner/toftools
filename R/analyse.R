@@ -48,17 +48,11 @@ analyse_dir <- function(tof_dir, pattern = "*.txt", tune = FALSE) {
 #' GC-IMS data.
 #'
 #' @param dir directory containing pre-processed GC-IMS files
-#' @param pattern (optional string, default '*.csv') File extension of GC-IMS files
 #' @export
-analyse_GCIMS <- function(dir, pattern = "*.csv") {
-
+analyse_GCIMS <- function(dir) {
   ## TODO: Interactive dir chooser
 
-  files <- list.files(dir, pattern = pattern, full.names = TRUE)
-
-  if (length(files) == 0) {
-    stop(stringr::str_glue("No files matching pattern ({pattern})"))
-  }
+  files <- list.files(dir, full.names = TRUE)
 
   ## Build class labels using 1st letter of filenames (expect 2 unique)
   label <- basename(files) %>%
