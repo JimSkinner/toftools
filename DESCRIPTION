@@ -27,7 +27,6 @@ Imports:
     knitr,
     purrr,
     rsample,
-    imager,
     forcats,
     viridis,
     e1071,

@@ -1,26 +1,26 @@
-coarsen <- function(mat, size_GC = 100, size_IMS = 100) {
-  stopifnot(!is.null(dimnames(mat)))
-
-  interpolate_names <- function(names, npoints) {
-    namerange <- names %>% as.numeric() %>% range()
-    seq(namerange[1], namerange[2], length.out = npoints) %>%
-      round(3) %>% as.character()
-  }
-
-  olddimnames <- dimnames(mat)
-  newdimnames <- olddimnames
-  newdimnames[[1]] <- interpolate_names(olddimnames[[1]], size_GC)
-  newdimnames[[2]] <- interpolate_names(olddimnames[[2]], size_IMS)
-  outmat <- mat %>%
-    imager::as.cimg() %>%
-    imager::resize(size_x = size_GC,
-                   size_y = size_IMS,
-                   interpolation_type = 2) %>%
-    as.matrix()
-
-  dimnames(outmat) <- newdimnames
-  outmat
-}
+# coarsen <- function(mat, size_GC = 100, size_IMS = 100) {
+#   stopifnot(!is.null(dimnames(mat)))
+#
+#   interpolate_names <- function(names, npoints) {
+#     namerange <- names %>% as.numeric() %>% range()
+#     seq(namerange[1], namerange[2], length.out = npoints) %>%
+#       round(3) %>% as.character()
+#   }
+#
+#   olddimnames <- dimnames(mat)
+#   newdimnames <- olddimnames
+#   newdimnames[[1]] <- interpolate_names(olddimnames[[1]], size_GC)
+#   newdimnames[[2]] <- interpolate_names(olddimnames[[2]], size_IMS)
+#   outmat <- mat %>%
+#     imager::as.cimg() %>%
+#     imager::resize(size_x = size_GC,
+#                    size_y = size_IMS,
+#                    interpolation_type = 2) %>%
+#     as.matrix()
+#
+#   dimnames(outmat) <- newdimnames
+#   outmat
+# }
 
 mat_names_to_vec <- function (dimnames) {
   rownames <- dimnames[[1]]
