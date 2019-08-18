@@ -40,7 +40,7 @@ if (ncol(tof) == 1) {
 
 tof <- tof %>%
   # Add a column called 'label' containing T/H
-  mutate(label = str_sub(sample, 1, 1)) %>%
+  mutate(label = extract_labels(sample)) %>%
   # Mode 'filename' & 'label' to first two columns
   select(sample, label, everything())
 
@@ -50,10 +50,6 @@ sample_count <- tof %>%
   count(label, name = "number")
 
 knitr::kable(sample_count, caption = "samples per class")
-
-if (nrow(sample_count) != 2) {
-  stop(paste0(file, ": Expected exactly two classes, found ", nrow(sample_count)))
-}
 ```
 
 ```{r results = "asis"}
