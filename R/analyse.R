@@ -62,12 +62,8 @@ analyse_GCIMS <- function(dir, pattern = "*.csv") {
 
   ## Build class labels using 1st letter of filenames (expect 2 unique)
   label <- basename(files) %>%
-    stringr::str_extract("[a-zA-Z]") %>%  # Take out 1st letter in the filename
-    as.factor()                           # Classes in alphabetic order
-
-  if (length(unique(label)) != 2) {
-    stop(stringr::str_glue("Expected 2 unique 1st letter file names. Found: {length(unique(label)) != 2}"))
-  }
+    extract_classes %>%
+    as.factor()                # Classes in alphabetic order
 
   ## Load all GCIMS data into a matrix
 
