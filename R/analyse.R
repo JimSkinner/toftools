@@ -50,13 +50,18 @@ analyse_dir <- function(tof_dir, pattern = "*.txt", tune = FALSE) {
 #' @param dir directory containing pre-processed GC-IMS files
 #' @export
 analyse_GCIMS <- function(dir) {
-  ## TODO: Interactive dir chooser
+  # This function is acrchitected lightly differently to analyse() - file
+  # loading is perofmred here instead of inside the analysis template.
 
-  files <- list.files(dir, full.names = TRUE)
+  # TODO: Interactive dir chooser
+
+  files <- dir %>%
+    normalizePath() %>%
+    list.files(full.names = TRUE)
 
   ## Build class labels using 1st letter of filenames (expect 2 unique)
   label <- basename(files) %>%
-    extract_classes %>%
+    toftools::extract_labels() %>%
     as.factor()                # Classes in alphabetic order
 
   ## Load all GCIMS data into a matrix

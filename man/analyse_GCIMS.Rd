@@ -5,12 +5,10 @@
 \title{Produce a report on the predictive accuracy of a directory of pre-processed
 GC-IMS data.}
 \usage{
-analyse_GCIMS(dir, pattern = "*.csv")
+analyse_GCIMS(dir)
 }
 \arguments{
 \item{dir}{directory containing pre-processed GC-IMS files}
-
-\item{pattern}{(optional string, default '*.csv') File extension of GC-IMS files}
 }
 \description{
 Produce a report on the predictive accuracy of a directory of pre-processed

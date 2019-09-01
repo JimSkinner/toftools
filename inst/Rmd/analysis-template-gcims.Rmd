@@ -61,7 +61,7 @@ for (model in models) {
   cat("\n")
   
 
-  reference_mat <- vec_to_mat(X[1,]) %>% coarsen(900, 900)
+  reference_mat <- vec_to_mat(X[1,]) # %>% coarsen(900, 900)
   importance <- crossvalidation_feature_importance(classifier, output_dataframe = TRUE) %>%
     filter(importance > 0) %>%
     mutate(
