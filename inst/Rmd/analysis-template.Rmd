@@ -31,7 +31,7 @@ if(!file.exists(file)) {
 
 # {.tabset .tabset-fade}
 
-```{r}
+```{r load-tof-data}
 tof <- purrr::quietly(load_tof)(file)$result
 
 if (ncol(tof) == 1) {
@@ -52,7 +52,7 @@ sample_count <- tof %>%
 knitr::kable(sample_count, caption = "samples per class")
 ```
 
-```{r results = "asis"}
+```{r crossvalidate, results = "asis"}
 data_mat <- as.matrix(tof[,-(1:2)])
 rownames(data_mat) <- tof$sample
 
