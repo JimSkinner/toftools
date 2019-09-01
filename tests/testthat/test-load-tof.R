@@ -26,7 +26,7 @@ test_that("extract_labels gives expected output on examples", {
   labels4 <- extract_labels(names4)
   expect_equal(labels4, labels3)
 
-  # Case chouls have no impact
+  # Case should have no impact
   names5 <- names4
   names5[c(1, 3, 5)] <- toupper(names5[c(1, 3, 5)])
   labels5 <- extract_labels(names5)
