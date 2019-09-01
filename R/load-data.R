@@ -29,10 +29,6 @@ load_tof <- function(tof_file) {
 #' fail if no such prefix exists). Return a lenth n character vector containing
 #' the classes.
 #'
-#' The output is run through make.names() which may add/remove characters, such
-#' that the resultant labels are valid variables names (to play nice with
-#' caret)
-#'
 #' @param names A set of sample names
 #' @return Character vector of labels
 #' @export
@@ -48,8 +44,7 @@ extract_labels <- function(names) {
 
   for (end in 1:max_length) {
     labels <- names %>%
-      str_sub(1, end) %>%
-      make.names()
+      str_sub(1, end)
 
     if (length(unique(labels)) == 2) {
       return(labels)

@@ -23,6 +23,8 @@ crossvalidate <- function(data_matrix, labels, model = "xgbTree", n_folds = 10,
   stopifnot(nrow(data_matrix) == length(labels))
   stopifnot(length(unique(labels)) == 2)
 
+  labels <- make.names(labels)
+
   data_matrix <- drop_nearly_all_zero(as.matrix(data_matrix), 0.5)
 
   train_control <- caret::trainControl(
