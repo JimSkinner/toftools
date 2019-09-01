@@ -154,10 +154,10 @@ crossvalidation_metrics <- function(classifier) {
   get_metrics <- function(pred) {
     pred %>%
       dplyr::summarise(
-        sens = yardstick::sens_vec(obs, pred),
-        spec = yardstick::spec_vec(obs, pred),
-        ppv  = yardstick::ppv_vec(obs, pred),
-        npv  = yardstick::npv_vec(obs, pred),
+        sens = purrr::quietly(yardstick::sens_vec)(obs, pred)$result,
+        spec = purrr::quietly(yardstick::spec_vec)(obs, pred)$result,
+        ppv  = purrr::quietly(yardstick::ppv_vec)(obs, pred)$result,
+        npv  = purrr::quietly(yardstick::npv_vec)(obs, pred)$result,
         auc  = safe_auc(., obs, !!pos_class, options = list(transpose = TRUE, direction = "<"))$.estimate
       )
   }
