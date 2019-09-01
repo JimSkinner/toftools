@@ -37,10 +37,10 @@ test_that("Calling 'analyse' on a TOF file with >2 classes produces an error", {
 context("system tests: GCIMS")
 
 test_that("Calling 'analyse_GCIMS' on a directory of GC-IMS files produces a report without errors", {
-  indir <- "../../data-raw/gcims"
-  outfile <- "../../data-raw/gcims/gcims-analysis.html"
+  indir <- "../../data-raw/gc ims" # Checks that spaces in directory names are supported
+  outfile <- "../../data-raw/gc ims/gcims-analysis.html"
 
-  suppressWarnings(file.remove(outfile)) # Existing file can hide fialed test
+  suppressWarnings(file.remove(outfile)) # Existing file can hide failed test
 
   analyse_GCIMS(indir)
 
