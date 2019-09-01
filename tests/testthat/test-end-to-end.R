@@ -38,7 +38,7 @@ context("system tests: GCIMS")
 
 test_that("Calling 'analyse_GCIMS' on a directory of GC-IMS files produces a report without errors", {
   indir <- "../../data-raw/gcims"
-  outfile <- "../../data-raw/gcims/gcims_analysis.html"
+  outfile <- "../../data-raw/gcims/gcims-analysis.html"
 
   suppressWarnings(file.remove(outfile)) # Existing file can hide fialed test
 
