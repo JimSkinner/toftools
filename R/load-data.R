@@ -44,7 +44,7 @@ extract_labels <- function(names) {
 
   for (end in 1:max_length) {
     labels <- names %>%
-      str_sub(1, end)
+      stringr::str_sub(1, end)
 
     if (length(unique(labels)) == 2) {
       return(labels)
